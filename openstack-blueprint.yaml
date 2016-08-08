@@ -69,7 +69,12 @@ node_templates:
         target: openvpn_host
     interfaces:
       cloudify.interfaces.lifecycle:
-        create: scripts/install.sh
+        create:
+          implementation: fabric.fabric_plugin.tasks.run_script
+          inputs:
+            script_path: scripts/install.sh
+            process:
+              command_prefix: sudo 
 
   openvpn_security_group:
     type: cloudify.openstack.nodes.SecurityGroup
