@@ -1,9 +1,6 @@
 #!/bin/bash
 
-sudo -s
-echo "Preparing the instance to be ready to run with Heat..."
-echo "######################################################"
-echo ""
+sudo /bin/bash -c "
 export DEBIAN_FRONTEND=noninteractive
 apt-get update
 apt-get -f -y -q install git python-setuptools ipcalc wget
@@ -11,9 +8,6 @@ apt-get -f -y -q install python-argparse cloud-init python-psutil python-pip
 pip install 'boto==2.5.2' heat-cfntools
 cfn-create-aws-symlinks -s /usr/local/bin/
 
-echo "Installing and configuring OpenVPN..."
-echo "###################################"
-echo ""
 apt-get -f -y -q install openvpn easy-rsa
 # TODO: get the floating IP from heat and avoid the following HACK
 # when http://docs.openstack.org/developer/heat/template_guide/
@@ -40,17 +34,14 @@ EOF
 cat > /etc/openvpn/down.sh <<EOF
 #!/bin/bash
 FORWARDING=\$(cat /var/log/openvpn/net.ipv4.conf.all.forwarding.bak)
-echo "restoring net.ipv4.conf.all.forwarding=\$FORWARDING"
 /sbin/sysctl net.ipv4.conf.all.forwarding=\$FORWARDING
 /etc/openvpn/fw.stop
-echo "Restoring iptables"
 /sbin/iptables-restore < /var/log/openvpn/iptables.save
 EOF
 
 # Firewall stop script
 cat > /etc/openvpn/fw.stop <<EOF
 #!/bin/sh
-echo "Stopping firewall and allowing everyone..."
 /sbin/iptables -F
 /sbin/iptables -X
 /sbin/iptables -t nat -F
@@ -75,7 +66,7 @@ crl-verify /etc/openvpn/crl.pem
 dh /etc/openvpn/dh2048.pem
 server $OVPN_IP $OVPN_MASK
 ifconfig-pool-persist ipp.txt
-push "route $PRIVATE_NETWORK_IP $PRIVATE_NETWORK_MASK"
+push 'route $PRIVATE_NETWORK_IP $PRIVATE_NETWORK_MASK'
 keepalive 10 120
 tls-auth ta.key 0 # This file is secret
 comp-lzo
@@ -126,7 +117,10 @@ openvpn --genkey --secret keys/ta.key
 ln keys/{ca.crt,server.crt,server.key,dh2048.pem,crl.pem,ta.key} /etc/openvpn/
 mv /tmp/openvpn.template ./client.conf
 tar -cvjpf vpnaccess.tar.bz2 client.conf keys/ca.crt keys/client.key keys/client.crt keys/ta.key
+apt install -y lighttpd
 cp vpnaccess.tar.bz2 /home/cloud/
+cp vpnaccess.tar.bz2 /var/www/
 chown cloud:cloud /home/cloud/vpnaccess.tar.bz2
 mkdir -p /var/log/openvpn
 service openvpn start
+"
