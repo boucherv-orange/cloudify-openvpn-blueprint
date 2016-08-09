@@ -20,6 +20,9 @@ inputs:
     type: string
     description: Network that will be the floating IP
 
+  remote_network_cidr:
+    type: string
+
 node_templates:
 
   openvpn_host:
@@ -73,9 +76,11 @@ node_templates:
         create:
           implementation: fabric.fabric_plugin.tasks.run_script
           inputs:
-            script_path: scripts/install.sh
+            script_path: scripts/install-server.sh
             process:
               command_prefix: sudo 
+              env:
+                REMOTE_NET_CIDR: { get_input: remote_network_cidr }
 
   openvpn_security_group:
     type: cloudify.openstack.nodes.SecurityGroup

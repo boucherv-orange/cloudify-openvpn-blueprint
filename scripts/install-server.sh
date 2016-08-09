@@ -1,6 +1,5 @@
 #!/bin/bash
 
-
 echo "Preparing the instance to be ready to run with Heat..."
 echo "######################################################"
 echo ""
@@ -25,15 +24,15 @@ export PRIVATE_IP_CIDR=$(ip addr show dev eth0 | grep 'inet .*$' | awk '{print $
 export PRIVATE_NETWORK_CIDR=$(ipcalc -nb $PRIVATE_IP_CIDR | grep ^Network | awk '{print $2}')
 export PRIVATE_NETWORK_IP=$(ipcalc -nb $PRIVATE_NETWORK_CIDR | grep ^Address | awk '{print $2}')
 export PRIVATE_NETWORK_MASK=$(ipcalc -nb $PRIVATE_NETWORK_CIDR | grep ^Netmask | awk '{print $2}')
-
+export REMOTE_NETWORK_IP=$(ipcalc -nb $REMOTE_NET_CIDR | grep ^Address | awk '{print $2}')
+export REMOTE_NETWORK_MASK=$(ipcalc -nb $REMOTE_NET_CIDR | grep ^Netmask | awk '{print $2}')
+ctx logger info $REMOTE_NET_CIDR
+mkdir -p /etc/openvpn/ccd
 
 cat > /etc/openvpn/route-up.sh <<EOF
 #!/bin/bash
 /sbin/sysctl -n net.ipv4.conf.all.forwarding > /var/log/openvpn/net.ipv4.conf.all.forwarding.bak
 /sbin/sysctl net.ipv4.conf.all.forwarding=1
-/sbin/iptables-save > /var/log/openvpn/iptables.save
-/sbin/iptables -t nat -F
-/sbin/iptables -t nat -A POSTROUTING -s 10.8.0.0/24 -j MASQUERADE
 EOF
 
 # Down script
@@ -42,26 +41,9 @@ cat > /etc/openvpn/down.sh <<EOF
 FORWARDING=\$(cat /var/log/openvpn/net.ipv4.conf.all.forwarding.bak)
 echo "restoring net.ipv4.conf.all.forwarding=\$FORWARDING"
 /sbin/sysctl net.ipv4.conf.all.forwarding=\$FORWARDING
-/etc/openvpn/fw.stop
-echo "Restoring iptables"
-/sbin/iptables-restore < /var/log/openvpn/iptables.save
 EOF
 
-# Firewall stop script
-cat > /etc/openvpn/fw.stop <<EOF
-#!/bin/sh
-echo "Stopping firewall and allowing everyone..."
-/sbin/iptables -F
-/sbin/iptables -X
-/sbin/iptables -t nat -F
-/sbin/iptables -t nat -X
-/sbin/iptables -t mangle -F
-/sbin/iptables -t mangle -X
-/sbin/iptables -P INPUT ACCEPT
-/sbin/iptables -P FORWARD ACCEPT
-/sbin/iptables -P OUTPUT ACCEPT
-EOF
-chmod 755 /etc/openvpn/down.sh /etc/openvpn/route-up.sh /etc/openvpn/fw.stop
+chmod 755 /etc/openvpn/down.sh /etc/openvpn/route-up.sh
 
 # OpenVPN server configuration
 cat > /etc/openvpn/server.conf <<EOF
@@ -76,6 +58,8 @@ dh /etc/openvpn/dh2048.pem
 server $OVPN_IP $OVPN_MASK
 ifconfig-pool-persist ipp.txt
 push "route $PRIVATE_NETWORK_IP $PRIVATE_NETWORK_MASK"
+client-config-dir /etc/openvpn/ccd
+route $REMOTE_NETWORK_IP $REMOTE_NETWORK_MASK
 keepalive 10 120
 tls-auth ta.key 0 # This file is secret
 comp-lzo
@@ -87,6 +71,11 @@ verb 3
 script-security 2
 route-up /etc/openvpn/route-up.sh
 down /etc/openvpn/down.sh
+EOF
+
+# OpenVPN server route towards the client
+cat > /etc/openvpn/ccd/client <<EOF
+iroute $REMOTE_NETWORK_IP $REMOTE_NETWORK_MASK
 EOF
 
 # Sample configuration for client
