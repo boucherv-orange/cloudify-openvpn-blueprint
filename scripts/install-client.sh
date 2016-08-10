@@ -2,7 +2,7 @@
 
 apt install openvpn
 
-wget http://84.39.46.78/vpnaccess.tar.bz2
+wget http://$OPENVPN_SERVER_IP/vpnaccess.tar.bz2
 
 tar -xvf vpnaccess.tar.bz2
 
