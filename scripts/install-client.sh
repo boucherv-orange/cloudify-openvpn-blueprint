@@ -1,6 +1,6 @@
 #!/bin/bash
 
-apt install openvpn
+apt install -y openvpn
 
 wget http://$OPENVPN_SERVER_IP/vpnaccess.tar.bz2
 
