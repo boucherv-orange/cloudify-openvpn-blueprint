@@ -72,7 +72,6 @@ node_templates:
           inputs:
             script_path: scripts/install-client.sh
             process:
-              command_prefix: sudo 
               env:
                 OPENVPN_SERVER_IP: { get_input: openvpn_server_ip }
         start:
