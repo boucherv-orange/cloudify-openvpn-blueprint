@@ -74,13 +74,7 @@ node_templates:
             process:
               env:
                 OPENVPN_SERVER_IP: { get_input: openvpn_server_ip }
-        start:
-          implementation: fabric.fabric_plugin.tasks.run_script
-          inputs:
-            script_path: scripts/start-client.sh
-            process:
-              command_prefix: sudo
-
+        start: scripts/start-client.sh
 
   openvpn_security_group:
     type: cloudify.openstack.nodes.SecurityGroup

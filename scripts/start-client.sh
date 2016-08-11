@@ -1,5 +1,5 @@
-#!/bin/bash
+#!/bin/bash -e
 
 cd /home/cloud
 
-nohup openvpn --config client.conf > /dev/null 2>&1 &
+sudo nohup openvpn --config client.conf > /dev/null 2>&1 &
