@@ -1,8 +1,9 @@
 #!/bin/bash -e
 
 sudo apt install -y openvpn
-ctx logger info "test1"
-ctx logger info $OPENVPN_SERVER_IP
+
+cd /home/cloud
+
 wget http://$OPENVPN_SERVER_IP/vpnaccess.tar.bz2
 
 tar -xvf vpnaccess.tar.bz2
