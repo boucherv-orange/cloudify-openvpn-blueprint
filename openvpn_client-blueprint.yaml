@@ -19,6 +19,14 @@ inputs:
   openvpn_server_ip:
     type: string
 
+  remote_network:
+    default: 10.67.79.0/24
+    type: string
+
+  management_subnet_name:
+    default: cloudify-management-network-subnet
+    type: string
+
 node_templates:
 
   openvpn_host:
@@ -89,3 +97,11 @@ node_templates:
           port_range_min: 1
           port_range_max: 65535
 
+  management_subnet:
+    type: cloudify.openstack.nodes.Subnet
+    properties:
+      resource_id: { get_input: management_subnet_name }
+      use_external_resource: true
+      subnet:
+        host_routes:
+          - { concat: [ { get_input: remote_network } , "," , { get_attribute: [ openvpn_host, ip ] } ] }
