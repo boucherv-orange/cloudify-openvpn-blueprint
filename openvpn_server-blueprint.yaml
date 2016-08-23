@@ -10,10 +10,10 @@ inputs:
   agent_user:
     description: User name used when SSH-ing into the started machine
 
-  image:
+  image_id:
     description: Openstack image name or id to use for the new server
 
-  flavor:
+  flavor_id:
     description: Openstack flavor name or id to use for the new server
 
   external_network_name:
