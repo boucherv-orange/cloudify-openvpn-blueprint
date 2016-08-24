@@ -11,3 +11,5 @@ tar -xvf vpnaccess.tar.bz2
 sed -i "s/user nobody/user cloud/g" client.conf 
 
 sudo sysctl -w net.ipv4.ip_forward=1
+
+ctx instance runtime_properties ip $(ctx instance host_ip)
