@@ -105,8 +105,9 @@ node_templates:
       use_external_resource: true
       subnet:
         host_routes:
-          - destination: { get_input: remote_network }
-            nexthop: { get_attribute: [ openvpn_host, ip ] }
+          - nexthop: { get_attribute: [openvpn_host, ip] }
+            destination: { get_input: remote_network }
+            
     relationships:
       - type: cloudify.relationships.depends_on
         target: openvpn_host
