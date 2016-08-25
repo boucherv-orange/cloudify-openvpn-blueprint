@@ -85,7 +85,7 @@ node_templates:
             process:
               command_prefix: sudo 
               env:
-                REMOTE_NET_CIDR: { get_input: remote_network_cidr }
+                REMOTE_NET_CIDR: { get_input: remote_network}
 
   openvpn_security_group:
     type: cloudify.openstack.nodes.SecurityGroup
