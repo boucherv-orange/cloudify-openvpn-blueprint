@@ -24,6 +24,10 @@ inputs:
   remote_network:
     type: string
 
+  management_subnet_name:
+    default: cloudify-management-network-subnet
+    type: string
+
 node_templates:
 
   openvpn_host:
