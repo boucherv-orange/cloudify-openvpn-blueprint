@@ -105,12 +105,7 @@ node_templates:
         target: management_subnet
     interfaces:
       cloudify.interfaces.lifecycle:
-        create:
-          implementation: fabric.fabric_plugin.tasks.run_script
-          inputs:
-            script_path: scripts/update_route.sh
-            process:
-              command_prefix: sudo -E
+        create: scripts/update_route.sh
 
   openvpn_security_group:
     type: cloudify.openstack.nodes.SecurityGroup
