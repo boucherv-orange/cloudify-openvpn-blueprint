@@ -83,9 +83,34 @@ node_templates:
           inputs:
             script_path: scripts/install-server.sh
             process:
-              command_prefix: sudo 
+              command_prefix: sudo -E
               env:
                 REMOTE_NET_CIDR: { get_input: remote_network}
+
+  manager_host:
+    type: cloudify.nodes.Compute
+    properties:
+      install_agent: true
+      ip: '127.0.0.1'
+      cloudify_agent:
+        user: cloud
+        key: ~/my.key
+
+  route_config:
+    type: cloudify.nodes.SoftwareComponent
+    relationships:
+      - type: cloudify.relationships.contained_in
+        target: manager_host
+      - type: cloudify.relationships.depends_on
+        target: management_subnet
+    interfaces:
+      cloudify.interfaces.lifecycle:
+        create:
+          implementation: fabric.fabric_plugin.tasks.run_script
+          inputs:
+            script_path: scripts/update_route.sh
+            process:
+              command_prefix: sudo -E
 
   openvpn_security_group:
     type: cloudify.openstack.nodes.SecurityGroup
