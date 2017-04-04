@@ -116,8 +116,8 @@ ln keys/{ca.crt,server.crt,server.key,dh2048.pem,crl.pem,ta.key} /etc/openvpn/
 mv /tmp/openvpn.template ./client.conf
 tar -cvjpf vpnaccess.tar.bz2 client.conf keys/ca.crt keys/client.key keys/client.crt keys/ta.key
 apt install -y lighttpd
-cp vpnaccess.tar.bz2 /home/cloud/
+cp vpnaccess.tar.bz2 /home/ubuntu/
 cp vpnaccess.tar.bz2 /var/www/
-chown cloud:cloud /home/cloud/vpnaccess.tar.bz2
+chown ubuntu:ubuntu /home/ubuntu/vpnaccess.tar.bz2
 mkdir -p /var/log/openvpn
 service openvpn start
