@@ -93,7 +93,7 @@ node_templates:
       install_agent: true
       ip: '127.0.0.1'
       cloudify_agent:
-        user: ubuntu
+        user: centos
         key: ~/my.key
 
   route_config:
