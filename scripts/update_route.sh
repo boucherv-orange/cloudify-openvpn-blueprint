@@ -1,3 +1,3 @@
-#! /bin/bash -e
+#! /bin/bash
 
 sudo dhclient
